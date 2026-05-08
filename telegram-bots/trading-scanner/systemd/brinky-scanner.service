@@ -1,0 +1,41 @@
+[Unit]
+Description=Brinky Trading Scanner Agent
+Documentation=file:///srv/brinky-company/agents/departments/trading/scanner/DEPLOYMENT.md
+After=network-online.target redis.service
+Wants=network-online.target
+PartOf=brinky.target
+
+[Service]
+Type=simple
+User=clawuser
+Group=clawuser
+WorkingDirectory=/srv/brinky-company/agents/departments/trading/scanner
+
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/srv/brinky-company:/srv/brinky-company/agents/departments/trading/scanner"
+Environment="LOG_LEVEL=INFO"
+Environment="REDIS_HOST=localhost"
+Environment="REDIS_PORT=6379"
+Environment="PROMETHEUS_PORT=9100"
+
+ExecStart=/usr/bin/python3 /srv/brinky-company/agents/departments/trading/scanner/main.py
+
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=300s
+StartLimitBurst=3
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/brinky-company/agents/departments/trading/scanner/logs /srv/brinky-company/agents/departments/trading/scanner/storage
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=brinky-scanner
+
+[Install]
+WantedBy=multi-user.target
